@@ -1,6 +1,3 @@
-# Auto-Boost-Essential-portable
-Fully automated AV1 encoding workflow for Windows. Drop .mkv files, double-click batch.bat, done. Uses Trix's SVT-AV1-Essential with Auto-Boost-Essential for consistent visual-metric quality. Handles auto-renaming, encoding, and muxing original audio/subs.
-
 # Auto-Boost-Essential Portable
 
 A fully automated AV1 encoding workflow for Windows. **One double-click** takes your raw `.mkv` files, encodes them to AV1 with consistent visual quality, and remuxes everything back together with the original audio and subtitles. No command line, no manual setup, no merging — just drop, click, relax.
