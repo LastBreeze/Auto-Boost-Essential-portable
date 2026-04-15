@@ -13,7 +13,6 @@ Built on Trix's **SVT-AV1-Essential** with **Auto-Boost-Essential**. A great pla
 - **Auto-renaming** — safely prepares your files for processing
 - **Auto-muxing** — recombines the new AV1 video with your original audio and subtitle tracks
 - **Resume support** — interruptions are handled gracefully (re-run the `.bat` to continue)
-- **Photon-noise 2** added to the final pass to mitigate banding (the only deviation from vanilla Auto-Boost-Essential.py)
 - **Automatic bt709/bt601 color space detection** to prevent color shifts
 - **znver2-optimized binary** by default, with an x86-64-v3 fallback for older CPUs
 
