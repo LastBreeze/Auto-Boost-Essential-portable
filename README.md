@@ -21,7 +21,7 @@ Built on Trix's **SVT-AV1-Essential** with **Auto-Boost-Essential**. A great pla
 
 ## 🚀 Quick Start
 
-1. **Drop** your `.mkv` files into the `Auto-Boost-Essential` folder.
+1. **Drop** your `.mkv` files into the `Auto-Boost-Essential` `videos-input` folder.
 2. **Double-click** the `.bat` file that matches your content (see below).
 3. **Relax.** Encoded files appear when finished.
 
