@@ -1,0 +1,5 @@
+Metadata-Version: 2.1
+Name: FFTW3_Library
+Version: 3.3.10
+Summary: Package for the FFTW3 library shared between several plugins
+Platform: All

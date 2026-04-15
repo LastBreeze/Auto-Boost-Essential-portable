@@ -1,0 +1,67 @@
+Changelog
+
+v1.39
+---------------------------------
+• Upgrade svt-av1-essential to 4.0.1
+
+v1.38
+---------------------------------
+• Fix extras\photon-noise-test.bat mkv file renaming bug
+
+v1.37
+---------------------------------
+• Add more photon-noise levels, you can now define by editing a .bat file: 2, 4, 6, 8, 10.
+• extras\photon-noise-test.bat will let you preview how the various photon-noise levels will appear in your av1 encode.
+
+v1.36
+---------------------------------
+• tag.py functionality restored, previous version was broken.
+• If output file already exists, processing is skipped for that file.
+
+v1.35
+---------------------------------
+• Add batch-anime-18-higher-slower.bat to create higher fidelity encodes at slower encoding speeds
+• Code cleanup, fix some errors
+
+v1.34
+---------------------------------
+• Updated to latest auto-boost-essential script. Changes: double GPU threads to increase speed for metrics phase.
+• Add 2.1 channel detection for audio encode scripts.
+• Consolidate prefilter scripts.
+
+v1.33
+---------------------------------
+• Various tweaks to dispatch.py to handle text display and file moving and copy operations.
+
+v1.32
+---------------------------------
+• Added downscale scripts to prefilter folder.
+• Added input/output folders.
+
+v1.31
+---------------------------------
+• extras\compare.bat: Apply oxipng lossless compression to speedup uploading to slow.pics.
+• Added prefilter folder for sources that need denoise and/or deband.
+• Added more batch files.
+• Automatic bt709/bt601 color spaces detection to address color shift.
+• Added audio-encoding folder
+
+v1.3
+---------------------------------
+• Upgraded svt-av1-essential to SVT-AV1-Essential_v3.1.2-Essential_+_ffms2_v3_PSYfeat2.patch.
+  - znver2 is the default binary, if your Intel or AMD CPU supports this, it will be fastest. A x86-64-v3 .exe is provided for compatibility, located in
+	tools\SVT-AV1-Essential builds, you may manually switch out the .exe file if needed.
+• Add resume support. Auto-Boost-Essential script supports resuming. The av1 encoding performed by svt-av1-essential does not support resuming.
+• Added tool extras\compress-folders.bat. For Windows 10/11 this will compress the VapourSynth and tools folders, saving about 60% of space.
+• New Troubleshooting Tool: Added extras\lossless-intermediary.bat.
+  - Use this if you have a "problematic" video that crashes or refuses to encode properly.
+  - It converts your video into a clean, lossless file that you can use as a stable source to ensure smooth encoding. Place your mkv file in the "tools" folder and
+	run lossless-intermediary.bat
+• New Opus Audio Tool: Added extras\encode-opus.audio.bat for easy audio compression.
+  - Automatically extracts audio from your MKV videos and converts it to high-quality, space-saving Opus format.
+  - Smartly processes multiple files at once using your CPU's full threads and saves a new video with opus audio to an output folder.
+• extras\forced-aspect-remux.bat added. After av1 encoding is complete, run this to copy over forced aspect ratio from source files to the av1 mkv.
+
+v1.2
+---------------------------------
+• Add "compare"  folder to auto generate slow.pics link to compare two mkv files
