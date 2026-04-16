@@ -87,12 +87,6 @@ Note: SVT-AV1-Essential itself does **not** support resuming. If the *final pass
 
 ---
 
-## 📝 Script Modifications
-
-`Auto-Boost-Essential.py` is kept **near-vanilla**. The only modification is the addition of `photon-noise 2` on the final pass to mitigate banding. No further changes are planned.
-
----
-
 ## 🧩 Related Projects
 
 - **Auto-Boost-Av1an** — Supports `zones.txt` and any quarterstep-CRF SVT-AV1 fork.
