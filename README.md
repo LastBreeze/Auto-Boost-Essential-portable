@@ -36,7 +36,6 @@ Pick based on content type and desired quality. **CRF 30 ("medium") is the recom
 | `batch-anime-30-medium.bat` | Balanced |
 | `batch-anime-25-high.bat` | High quality, larger files |
 | `batch-anime-20-higher.bat` | Higher quality, even larger files |
-| `batch-anime-18-higher-slower.bat` | Highest fidelity, slower encoding |
 
 ### Live Action / Movies / TV
 | File | Quality |
@@ -51,7 +50,7 @@ Pick based on content type and desired quality. **CRF 30 ("medium") is the recom
 | `batch-sports-35-medium.bat` | Optimized for fast motion efficiency |
 
 ### CRF Quality Guide
-- **18–20** — Higher quality, slowest encoding, largest files
+- **20** — Higher quality, slowest encoding, largest files
 - **25** — High quality, good balance
 - **30** — Medium quality, faster encoding, smaller files *(recommended starting point)*
 - **35** — Lower quality, fastest encoding, smallest files
