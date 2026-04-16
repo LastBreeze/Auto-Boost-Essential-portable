@@ -2,7 +2,7 @@
 
 A fully automated AV1 encoding workflow for Windows. **One double-click** takes your raw `.mkv` files, encodes them to AV1 with consistent visual quality, and remuxes everything back together with the original audio and subtitles. No command line, no manual setup, no merging — just drop, click, relax.
 
-Built on Trix's **SVT-AV1-Essential** with **Auto-Boost-Essential**. A great place to start with AV1 on Windows.
+Built on Trix's [**SVT-AV1-Essential**](https://github.com/nekotrix/SVT-AV1-Essential) with [**Auto-Boost-Essential**](https://github.com/nekotrix/auto-boost-algorithm/tree/main/Auto-Boost-Essential). A great place to start with AV1 on Windows.
 
 ---
 
