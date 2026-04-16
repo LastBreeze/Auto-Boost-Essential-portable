@@ -89,7 +89,7 @@ Note: SVT-AV1-Essential itself does **not** support resuming. If the *final pass
 
 ## 🧩 Related Projects
 
-- **Auto-Boost-Av1an** — Supports `zones.txt` and any quarterstep-CRF SVT-AV1 fork.
+- [**Auto-Boost-Av1an**](https://github.com/abdalrahmanx9/Auto-Boost-Av1an-Linux/) — Supports `zones.txt` and any quarterstep-CRF SVT-AV1 fork.
 - **Auto-Boost Av1an for Linux** — Linux port by `! D7M 𒉭`.
 
 ---
