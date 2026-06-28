@@ -2,7 +2,7 @@
 
 A fully automated AV1 encoding workflow for Windows. **One double-click** takes your raw `.mkv` files, encodes them to AV1 with consistent visual quality, and remuxes everything back together with the original audio and subtitles. No command line, no manual setup, no merging — just drop, click, relax.
 
-Built on Trix's [**SVT-AV1-Essential**](https://github.com/nekotrix/SVT-AV1-Essential) with [**Auto-Boost-Essential**](https://github.com/nekotrix/auto-boost-algorithm/tree/main/Auto-Boost-Essential). A great place to start with AV1 on Windows.
+Built on Trix's **SVT-AV1-Essential** with **Auto-Boost-Essential**. A great place to start with AV1 on Windows.
 
 ---
 
@@ -13,6 +13,7 @@ Built on Trix's [**SVT-AV1-Essential**](https://github.com/nekotrix/SVT-AV1-Esse
 - **Auto-renaming** — safely prepares your files for processing
 - **Auto-muxing** — recombines the new AV1 video with your original audio and subtitle tracks
 - **Resume support** — interruptions are handled gracefully (re-run the `.bat` to continue)
+- **Photon-noise 2** added to the final pass to mitigate banding (the only deviation from vanilla Auto-Boost-Essential.py)
 - **Automatic bt709/bt601 color space detection** to prevent color shifts
 - **znver2-optimized binary** by default, with an x86-64-v3 fallback for older CPUs
 
@@ -36,6 +37,7 @@ Pick based on content type and desired quality. **CRF 30 ("medium") is the recom
 | `batch-anime-30-medium.bat` | Balanced |
 | `batch-anime-25-high.bat` | High quality, larger files |
 | `batch-anime-20-higher.bat` | Higher quality, even larger files |
+| `batch-anime-18-higher-slower.bat` | Highest fidelity, slower encoding |
 
 ### Live Action / Movies / TV
 | File | Quality |
@@ -50,7 +52,7 @@ Pick based on content type and desired quality. **CRF 30 ("medium") is the recom
 | `batch-sports-35-medium.bat` | Optimized for fast motion efficiency |
 
 ### CRF Quality Guide
-- **20** — Higher quality, slowest encoding, largest files
+- **18–20** — Higher quality, slowest encoding, largest files
 - **25** — High quality, good balance
 - **30** — Medium quality, faster encoding, smaller files *(recommended starting point)*
 - **35** — Lower quality, fastest encoding, smallest files
@@ -86,9 +88,15 @@ Note: SVT-AV1-Essential itself does **not** support resuming. If the *final pass
 
 ---
 
+## 📝 Script Modifications
+
+`Auto-Boost-Essential.py` is kept **near-vanilla**. The only modification is the addition of `photon-noise 2` on the final pass to mitigate banding. No further changes are planned.
+
+---
+
 ## 🧩 Related Projects
 
-- [**Auto-Boost-Av1an**](https://github.com/abdalrahmanx9/Auto-Boost-Av1an-Linux/) — Supports `zones.txt` and any quarterstep-CRF SVT-AV1 fork.
+- **Auto-Boost-Av1an** — Supports `zones.txt` and any quarterstep-CRF SVT-AV1 fork.
 - **Auto-Boost Av1an for Linux** — Linux port by `! D7M 𒉭`.
 
 ---
