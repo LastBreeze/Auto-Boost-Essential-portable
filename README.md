@@ -10,52 +10,60 @@ Built on Trix's **SVT-AV1-Essential** with **Auto-Boost-Essential**. A great pla
 
 - **Zero configuration** — fully portable, no installation required
 - **Visual-metric driven encoding** for consistent perceptual quality across scenes
+- **Interactive Batch Builder** — answer a few simple questions and it writes a custom encode script for you
 - **Auto-renaming** — safely prepares your files for processing
 - **Auto-muxing** — recombines the new AV1 video with your original audio and subtitle tracks
 - **Resume support** — interruptions are handled gracefully (re-run the `.bat` to continue)
-- **Photon-noise 2** added to the final pass to mitigate banding (the only deviation from vanilla Auto-Boost-Essential.py)
+- **Photon-noise** added to the final pass to mitigate banding
 - **Automatic bt709/bt601 color space detection** to prevent color shifts
+- **Dark-scene quality boost** to reduce banding and detail loss in shadows and night scenes
+- **Choice of quality metric** — SSIMULACRA 2 (accurate) or XPSNR (fast)
+- **AVX-512 support** for CPUs that have it
 - **znver2-optimized binary** by default, with an x86-64-v3 fallback for older CPUs
 
 ---
 
 ## 🚀 Quick Start
 
-1. **Drop** your `.mkv` files into the `Auto-Boost-Essential` `videos-input` folder.
-2. **Double-click** the `.bat` file that matches your content (see below).
-3. **Relax.** Encoded files appear when finished.
+1. **Drop** your video files (`.mkv`, `.mp4`, `.m2ts`) into the `videos-input` folder.
+2. **Double-click** a `.bat` file (see below). The easiest path is the included `batch-30-medium-XPSNR-START-HERE.bat`.
+3. **Relax.** Encoded files appear in the `videos-output` folder when finished.
+
+> 💡 New to this? Just run `batch-30-medium-XPSNR-START-HERE.bat`. It uses sensible defaults and is the perfect first encode.
 
 ---
 
-## 📁 Which `.bat` should I use?
+## 🛠 Make Your Own Encode Script — `bat-builder.bat`
 
-Pick based on content type and desired quality. **CRF 30 ("medium") is the recommended starting point** — adjust from there if needed.
+Instead of hunting for the right preset, you can now **build your own** custom encode script by answering a few plain-English questions.
 
-### Anime
-| File | Quality |
-|------|---------|
-| `batch-anime-30-medium.bat` | Balanced |
-| `batch-anime-25-high.bat` | High quality, larger files |
-| `batch-anime-20-higher.bat` | Higher quality, even larger files |
-| `batch-anime-18-higher-slower.bat` | Highest fidelity, slower encoding |
+**Double-click `bat-builder.bat`** and it will walk you through 5 quick steps:
 
-### Live Action / Movies / TV
-| File | Quality |
-|------|---------|
-| `batch-liveaction-30-medium.bat` | Balanced |
-| `batch-liveaction-25-high.bat` | High quality, larger files |
-| `batch-liveaction-20-higher.bat` | Higher quality, even larger files |
+1. **Quality Level (CRF)** — the balance between file size and visual quality. Lower number = better quality + bigger file. Start at **30** if unsure.
+2. **Fidelity / Detail Preservation** — how hard the encoder works to keep fine detail (textures, grain, fine lines). Start at **0**; bump it up if textures look soft.
+3. **Dark Scene Quality Boost** — adds extra quality to dark/night scenes to fight banding and blocking in shadows. Start at **20**.
+4. **Quality Metric** — **SSIMULACRA 2** (slower, more accurate) or **XPSNR** (faster, less accurate).
+5. **AVX-512 Support** — only say Yes if you're sure your CPU supports AVX-512. If unsure, leave it off.
 
-### Sports
-| File | Quality |
-|------|---------|
-| `batch-sports-35-medium.bat` | Optimized for fast motion efficiency |
+When you're done, it saves a ready-to-run `.bat` file (e.g. `batbuilder-ssimulacra2-d0-crf30.bat`) right in the main folder. Just double-click it to encode.
 
-### CRF Quality Guide
-- **18–20** — Higher quality, slowest encoding, largest files
-- **25** — High quality, good balance
-- **30** — Medium quality, faster encoding, smaller files *(recommended starting point)*
-- **35** — Lower quality, fastest encoding, smallest files
+> Want to tweak it further by hand? Open any generated `.bat` in Notepad++ and edit the settings at the top.
+
+---
+
+## 📊 CRF Quality Guide
+
+CRF controls the trade-off between quality and file size:
+
+| CRF | Quality | Notes |
+|-----|---------|-------|
+| 20 | Higher | Very high quality, slowest, largest files |
+| 25 | High | Great quality, good balance |
+| 30 | Medium | Good quality, faster, smaller files *(recommended starting point)* |
+| 35 | Low | Lower quality, fast, small files |
+| 40 | Lower | Lowest quality, fastest, smallest files |
+
+**CRF 30 is the recommended starting point.** Adjust from there based on how the result looks.
 
 ---
 
@@ -72,11 +80,7 @@ Located in the `extras\` folder:
 
 The `prefilter\` folder contains scripts for sources that need denoising, debanding, or downscaling.
 
----
-
-## ⚡ Choosing the fastest SVT-AV1 binary
-
-`znver2` is the default for `SvtAv1EncApp.exe`. If your modern Intel or AMD CPU supports it, this will be the fastest option. An `x86-64-v3` build is provided for compatibility — swap the `.exe` manually from `tools\SVT-AV1-Essential builds\` if needed.
+The `audio-encoding\` folder contains scripts for compressing and re-encoding audio tracks.
 
 ---
 
@@ -90,14 +94,14 @@ Note: SVT-AV1-Essential itself does **not** support resuming. If the *final pass
 
 ## 📝 Script Modifications
 
-`Auto-Boost-Essential.py` is kept **near-vanilla**. The only modification is the addition of `photon-noise 2` on the final pass to mitigate banding. No further changes are planned.
+`Auto-Boost-Essential.py` is kept **near-vanilla**. The only modification is the addition of `photon-noise` on the final pass to mitigate banding. No further changes are planned.
 
 ---
 
 ## 🧩 Related Projects
 
-- **Auto-Boost-Av1an** — Supports `zones.txt` and any quarterstep-CRF SVT-AV1 fork.
-- **Auto-Boost Av1an for Linux** — Linux port by `! D7M 𒉭`.
+- [**Auto-Boost-Av1an**](https://github.com/LastBreeze/Auto-Boost-Av1an-portable) — Supports `zones.txt` and any quarterstep-CRF SVT-AV1 fork.
+- [**Auto-Boost Av1an for Linux**](https://github.com/abdalrahmanx9/Auto-Boost-Av1an-Linux) — Linux port by `! D7M 𒉭`.
 
 ---
 
