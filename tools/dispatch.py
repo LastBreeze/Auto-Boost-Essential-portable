@@ -5,6 +5,48 @@ import shutil
 import glob
 from wakepy import keep
 
+SVT_BUILD_ROOT = os.path.join("SVT-AV1-Essential builds", "SVT-AV1-Essential_v4.0.1-Essential")
+STANDARD_SVT_BUILD = os.path.join(SVT_BUILD_ROOT, "Clang 22.1.1 x86-64-v3", "SvtAv1EncApp.exe")
+AVX512_SVT_BUILD = os.path.join(SVT_BUILD_ROOT, "Clang 22.1.1 icelake-server + znver4", "SvtAv1EncApp.exe")
+
+
+def copy_svt_encoder(tools_dir, input_dir, use_avx512):
+    """Copy the selected SVT-AV1-Essential executable into videos-input.
+
+    Auto-Boost-Essential.py runs from videos-input, so SvtAv1EncApp.exe needs
+    to be placed there.  --avx512 selects the optimized build; otherwise the
+    packaged root tools/SvtAv1EncApp.exe is used, with an x86-64-v3 build
+    fallback if the root exe is missing.
+    """
+    candidates = []
+    if use_avx512:
+        candidates.append(os.path.join(tools_dir, AVX512_SVT_BUILD))
+    else:
+        candidates.append(os.path.join(tools_dir, "SvtAv1EncApp.exe"))
+        candidates.append(os.path.join(tools_dir, STANDARD_SVT_BUILD))
+
+    selected = None
+    for candidate in candidates:
+        if os.path.exists(candidate):
+            selected = candidate
+            break
+
+    if selected is None:
+        requested = "AVX-512" if use_avx512 else "standard"
+        print(f"[Dispatch] ERROR: Could not find the requested {requested} SvtAv1EncApp.exe.")
+        for candidate in candidates:
+            print(f"[Dispatch] Checked: {candidate}")
+        sys.exit(1)
+
+    dst = os.path.join(input_dir, "SvtAv1EncApp.exe")
+    try:
+        shutil.copy2(selected, dst)
+        label = "AVX-512" if use_avx512 else "standard"
+        print(f"[Dispatch] Using {label} SVT-AV1-Essential executable: {selected}")
+    except Exception as e:
+        print(f"[Dispatch] ERROR: Failed to copy SvtAv1EncApp.exe: {e}")
+        sys.exit(1)
+
 def main():
     # --- Configuration ---
     script_path = os.path.abspath(__file__)
@@ -17,9 +59,23 @@ def main():
     os.makedirs(input_dir, exist_ok=True)
     os.makedirs(output_dir, exist_ok=True)
 
+    # --- Dispatcher-only options ---
+    raw_args = sys.argv[1:]
+    use_avx512 = False
+    input_args = []
+    idx = 0
+    while idx < len(raw_args):
+        arg = raw_args[idx]
+        if arg == "--avx512":
+            use_avx512 = True
+            idx += 1
+            continue
+        input_args.append(arg)
+        idx += 1
+
     # --- Setup Tools in Input Folder (Silent) ---
     # Copy the worker script and required tools directly to the videos-input folder
-    tools_to_copy = ["Auto-Boost-Essential.py", "ffms2.dll", "SvtAv1EncApp.exe"]
+    tools_to_copy = ["Auto-Boost-Essential.py", "ffms2.dll"]
     for tool in tools_to_copy:
         src = os.path.join(tools_dir, tool)
         dst = os.path.join(input_dir, tool)
@@ -27,7 +83,8 @@ def main():
             try:
                 shutil.copy2(src, dst)
             except Exception:
-                pass 
+                pass
+    copy_svt_encoder(tools_dir, input_dir, use_avx512)
 
     # --- Scan for Files (Silent) ---
     extensions = ('.mp4', '.mkv', '.m2ts')
@@ -123,7 +180,6 @@ def main():
         elif is_bt601: current_flags = bt601_flags
         
         final_cmd.extend(["-i", filename])
-        input_args = sys.argv[1:]
         skip_next = False
         for idx, arg in enumerate(input_args):
             if skip_next:

@@ -1,5 +1,13 @@
 Changelog
 
+v1.4
+---------------------------------
+• Update vs-zip to 19.0.0 for performance increase in cpu based SSIM2 metrics
+• Added bat-builder to make custom encode .bat files
+• Added AVX-512 support for CPUs that can use it.
+  - If selected, the scripts use the AVX-512 optimized SVT-AV1-Essential encoder.
+  - If you are not sure your CPU supports AVX-512, leave it off and the normal encoder is used.
+
 v1.39
 ---------------------------------
 • Upgrade svt-av1-essential to 4.0.1
