@@ -171,7 +171,7 @@ def main():
     print("  2: XPSNR")
     print("     Faster, less accurate.\n")
     metric_choice = input("Select metric [1 SSIMULACRA 2 / 2 XPSNR] (Press Enter for SSIMULACRA 2): ").strip()
-    metric_name = "xpsnr" if metric_choice == "2" else "ssimulacra2"
+    metric_name = "xpsnr" if metric_choice == "2" else "ssim2"
     metric_flag = "" if metric_name == "xpsnr" else "--ssimu2"
 
     print("\n--------------------------------------------------------")
