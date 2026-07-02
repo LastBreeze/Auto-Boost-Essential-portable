@@ -48,8 +48,8 @@ def params_for_content(crf, luminance_qp_bias, distortion_bias_preset):
 
     # Auto-Boost-Av1an-portable SVT-AV1-Essential CRF 30 defaults.
     # CRF 30 itself is supplied by --quality medium, so --crf is only added for non-30 CRF values.
-    fast_params = f"{crf_param}--scd 0 --enable-dlf 3{distortion_param}{luminance_param}"
-    final_params = f"{crf_param}--scd 0 --enable-dlf 3{distortion_param}{luminance_param} --lp 3 --photon-noise 200"
+    fast_params = f"{crf_param}--enable-dlf 3{distortion_param}{luminance_param}"
+    final_params = f"{crf_param}--enable-dlf 3{distortion_param}{luminance_param} --lp 3 --photon-noise 200"
 
     return fast_params, final_params
 

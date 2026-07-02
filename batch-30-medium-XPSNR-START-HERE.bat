@@ -1,6 +1,6 @@
 @echo off
-set "FAST_PARAMS=--scd 0 --enable-dlf 3 --luminance-qp-bias 20"
-set "FINAL_PARAMS=--scd 0 --enable-dlf 3 --luminance-qp-bias 20 --lp 3 --photon-noise 200"
+set "FAST_PARAMS=--enable-dlf 3 --luminance-qp-bias 20"
+set "FINAL_PARAMS=--enable-dlf 3 --luminance-qp-bias 20 --lp 3 --photon-noise 200"
 set "FAST_SPEED=faster"
 set "FINAL_SPEED=slow"
 set "AVX512_FLAG="
