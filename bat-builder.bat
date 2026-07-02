@@ -8,3 +8,4 @@ if exist "VapourSynth\python.exe" (
 ) else (
     python "tools\bat-builder.py"
 )
+:: copy video track title = false

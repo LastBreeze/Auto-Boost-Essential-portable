@@ -4,6 +4,8 @@ import re
 import subprocess
 import tempfile
 import sys
+import json
+import html
 
 def get_script_version():
     """Extracts the latest version number from changelog.txt in the root dir."""
@@ -71,6 +73,21 @@ def get_active_batch_filename():
         
     return batch_name
 
+def get_copy_video_track_title_setting():
+    """Reads the secret launcher setting from ../bat-builder.bat."""
+    # tag.py is executed from videos-input by dispatch.py, so the root project
+    # folder is one level up from the current working directory.
+    setting_path = os.path.join("..", "bat-builder.bat")
+    try:
+        with open(setting_path, "r", encoding="utf-8") as f:
+            for line in f:
+                match = re.match(r"\s*::\s*copy\s+video\s+track\s+title\s*=\s*(true|false)\b", line, re.IGNORECASE)
+                if match:
+                    return match.group(1).lower() == "true"
+    except Exception:
+        pass
+    return False
+
 def parse_batch_settings(batch_filename):
     """Reads the .bat file and extracts arguments."""
     settings = {
@@ -81,7 +98,8 @@ def parse_batch_settings(batch_filename):
         "fast_speed": None,
         "final_speed": None,
         "photon_noise": None,
-        "final_params": ""
+        "final_params": "",
+        "copy_video_track_title": get_copy_video_track_title_setting()
     }
     
     # The batch file is likely in the Root directory (..), not in tools or temp
@@ -157,6 +175,7 @@ def get_crf_string(quality):
 def apply_tag_to_file(filepath, encoding_settings):
     """Writes a temp XML and applies it to the MKV file via mkvpropedit."""
     # We create the xml in the current temp dir
+    escaped_encoding_settings = html.escape(encoding_settings, quote=False)
     
     xml_template = f"""<?xml version="1.0"?>
 <Tags>
@@ -166,7 +185,7 @@ def apply_tag_to_file(filepath, encoding_settings):
     </Targets>
     <Simple>
       <Name>ENCODING_SETTINGS</Name>
-      <String>{encoding_settings}</String>
+      <String>{escaped_encoding_settings}</String>
     </Simple>
   </Tag>
 </Tags>
@@ -194,6 +213,74 @@ def apply_tag_to_file(filepath, encoding_settings):
                 os.remove(tmp_path)
             except:
                 pass
+
+def find_source_for_output(output_filepath):
+    """Finds the original source video for a *-output.mkv file.
+
+    dispatch.py runs tag.py from videos-input before moving the output to
+    videos-output. Source files are also in videos-input and can be .mp4, .mkv,
+    or .m2ts. mux.py additionally supports names that were renamed with a
+    -source suffix, so check both naming patterns.
+    """
+    output_name = os.path.basename(output_filepath)
+    if not output_name.lower().endswith("-output.mkv"):
+        return None
+
+    base_name = output_name[:-len("-output.mkv")]
+    extensions = (".mkv", ".mp4", ".m2ts")
+    candidates = []
+    for ext in extensions:
+        candidates.append(base_name + ext)
+        candidates.append(base_name + "-source" + ext)
+
+    for candidate in candidates:
+        if os.path.exists(candidate) and os.path.isfile(candidate):
+            return candidate
+    return None
+
+def get_video_track_title(source_filepath):
+    """Returns the first video track title from the source file, if present."""
+    mkvmerge_path = os.path.join("..", "tools", "MKVToolNix", "mkvmerge.exe")
+    try:
+        result = subprocess.run(
+            [mkvmerge_path, "-J", source_filepath],
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="ignore"
+        )
+        data = json.loads(result.stdout)
+    except Exception:
+        return None
+
+    for track in data.get("tracks", []):
+        if track.get("type") != "video":
+            continue
+        properties = track.get("properties", {})
+        title = properties.get("track_name") or properties.get("title")
+        if title is not None:
+            return str(title)
+        return None
+    return None
+
+def copy_video_track_title(source_filepath, output_filepath):
+    """Copies the source video's first video track title to the output video."""
+    title = get_video_track_title(source_filepath)
+    if title is None:
+        return
+
+    mkvpropedit_path = os.path.join("..", "tools", "MKVToolNix", "mkvpropedit.exe")
+    try:
+        subprocess.run(
+            [mkvpropedit_path, output_filepath, "--edit", "track:v1", "--set", "name=" + title],
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+    except Exception:
+        # Track-title copying is non-critical, same as ENCODING_SETTINGS tagging.
+        pass
 
 def main():
     # 1. Identify which batch file launched this script
@@ -243,6 +330,10 @@ def main():
     
     for f in files:
         apply_tag_to_file(f, full_string)
+        if args["copy_video_track_title"]:
+            source_file = find_source_for_output(f)
+            if source_file:
+                copy_video_track_title(source_file, f)
 
 if __name__ == "__main__":
     main()

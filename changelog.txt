@@ -1,5 +1,15 @@
 Changelog
 
+v1.42
+---------------------------------
+• Added extras\JMkvpropedit, can be used to edit mkv track titles/properties without remuxing
+• Audio encoding scripts will now optionally carryover track titles
+• Add Nvidia/Vulkan vship plugin swapper for ssim2 gpu based metrics
+
+v1.41
+---------------------------------
+• Correct scene detection
+
 v1.4
 ---------------------------------
 • Update vs-zip to 19.0.0 for performance increase in cpu based SSIM2 metrics
