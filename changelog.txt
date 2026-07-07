@@ -2,7 +2,7 @@ Changelog
 
 v1.42
 ---------------------------------
-• Added extras\JMkvpropedit, can be used to edit mkv track titles/properties without remuxing
+• Added extras\JMkvpropedit, can be used to batch edit mkv track titles/properties without remuxing
 • Audio encoding scripts will now optionally carryover track titles
 • Add Nvidia/Vulkan vship plugin swapper for ssim2 gpu based metrics
 
