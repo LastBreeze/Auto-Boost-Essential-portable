@@ -36,26 +36,27 @@ def quality_label_from_crf(crf):
     return "lower"
 
 
-def params_for_content(crf, luminance_qp_bias, distortion_bias_preset):
+def params_for_content(crf, luminance_qp_bias, distortion_bias_preset, is_anime):
     try:
         crf_value = float(crf)
     except ValueError:
         crf_value = 30.0
 
     crf_param = "" if crf_value == 30.0 else f"--crf {crf} "
+    alt_cdef_param = " --enable-alt-cdef 1" if is_anime else ""
     luminance_param = f" --luminance-qp-bias {luminance_qp_bias}"
     distortion_param = "" if distortion_bias_preset == "0" else f" --distortion-bias-preset {distortion_bias_preset}"
 
     # Auto-Boost-Av1an-portable SVT-AV1-Essential CRF 30 defaults.
     # CRF 30 itself is supplied by --quality medium, so --crf is only added for non-30 CRF values.
-    fast_params = f"{crf_param}--enable-dlf 3{distortion_param}{luminance_param}"
-    final_params = f"{crf_param}--enable-dlf 3{distortion_param}{luminance_param} --lp 3 --photon-noise 200"
+    fast_params = f"{crf_param}--enable-dlf 3{alt_cdef_param}{distortion_param}{luminance_param}"
+    final_params = f"{crf_param}--enable-dlf 3{alt_cdef_param}{distortion_param}{luminance_param} --photon-noise 200"
 
     return fast_params, final_params
 
 
-def build_batch_script(crf, luminance_qp_bias, distortion_bias_preset, use_avx512, metric_flag):
-    fast_params, final_params = params_for_content(crf, luminance_qp_bias, distortion_bias_preset)
+def build_batch_script(crf, luminance_qp_bias, distortion_bias_preset, use_avx512, metric_flag, is_anime):
+    fast_params, final_params = params_for_content(crf, luminance_qp_bias, distortion_bias_preset, is_anime)
     quality_label = quality_label_from_crf(crf)
     fast_speed = "faster"
     final_speed = "slow"
@@ -106,7 +107,7 @@ def main():
     print("Just answer the questions below and your script will be ready to run.\n")
 
     print("\n--------------------------------------------------------")
-    print("STEP 1 OF 5: Choose a Quality Level (CRF)")
+    print("STEP 1 OF 6: Choose a Quality Level (CRF)")
     print("--------------------------------------------------------")
     print("CRF controls the balance between file size and visual quality.")
     print("Lower numbers = higher quality + larger file size.")
@@ -130,7 +131,7 @@ def main():
         crf = "30"
 
     print("\n--------------------------------------------------------")
-    print("STEP 2 OF 5: Fidelity / Detail Preservation")
+    print("STEP 2 OF 6: Fidelity / Detail Preservation")
     print("--------------------------------------------------------")
     print("This SVT-AV1-Essential setting controls how aggressively the")
     print("encoder preserves fine detail vs. smoothing things out to save space.\n")
@@ -148,7 +149,7 @@ def main():
         distortion_bias_preset = "0"
 
     print("\n--------------------------------------------------------")
-    print("STEP 3 OF 5: Dark Scene Quality Boost")
+    print("STEP 3 OF 6: Dark Scene Quality Boost")
     print("--------------------------------------------------------")
     print("By default, AV1 treats dark/low-light scenes as less important")
     print("and gives them less detail. This can cause banding or")
@@ -163,19 +164,19 @@ def main():
         luminance_qp_bias = "20"
 
     print("\n--------------------------------------------------------")
-    print("STEP 4 OF 5: Quality Metric")
+    print("STEP 4 OF 6: Quality Metric")
     print("--------------------------------------------------------")
     print("Which metric should Auto-Boost use to measure quality?\n")
     print("  1: SSIMULACRA 2")
     print("     Slower, more accurate.\n")
     print("  2: XPSNR")
     print("     Faster, less accurate.\n")
-    metric_choice = input("Select metric [1 SSIMULACRA 2 / 2 XPSNR] (Press Enter for SSIMULACRA 2): ").strip()
+    metric_choice = input("Select metric (Press Enter for SSIMULACRA 2): ").strip()
     metric_name = "xpsnr" if metric_choice == "2" else "ssim2"
     metric_flag = "" if metric_name == "xpsnr" else "--ssimu2"
 
     print("\n--------------------------------------------------------")
-    print("STEP 5 OF 5: AVX-512 CPU Support")
+    print("STEP 5 OF 6: AVX-512 CPU Support")
     print("--------------------------------------------------------")
     print("Some SVT-AV1-Essential builds have an AVX-512 optimized exe.")
     print("Only select Yes if you are sure your CPU supports AVX-512.")
@@ -185,9 +186,19 @@ def main():
     avx_choice = input("Does your CPU support AVX-512? [1 Yes / 2 No] (Press Enter for No): ").strip()
     use_avx512 = avx_choice == "1"
 
+    print("\n--------------------------------------------------------")
+    print("STEP 6 OF 6: Content Type")
+    print("--------------------------------------------------------")
+    print("What type of content are you encoding?\n")
+    print("  1: Anime")
+    print("  2: Live action\n")
+    content_choice = input("Select content type (Press Enter for Anime): ").strip()
+    is_anime = content_choice != "2"
+
     avx_suffix = "-avx512" if use_avx512 else ""
-    output_filename = f"batbuilder-{metric_name}-d{distortion_bias_preset}-crf{crf}{avx_suffix}.bat"
-    script = build_batch_script(crf, luminance_qp_bias, distortion_bias_preset, use_avx512, metric_flag)
+    content_slug = "anime" if is_anime else "liveaction"
+    output_filename = f"batbuilder-{content_slug}-{metric_name}-d{distortion_bias_preset}-crf{crf}{avx_suffix}.bat"
+    script = build_batch_script(crf, luminance_qp_bias, distortion_bias_preset, use_avx512, metric_flag, is_anime)
 
     root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     file_path = os.path.join(root_dir, output_filename)
