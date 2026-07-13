@@ -1,5 +1,9 @@
 Changelog
 
+v1.43
+---------------------------------
+• Code cleanup, repair mp4 support, improve bat-builder settings
+
 v1.42
 ---------------------------------
 • Added extras\JMkvpropedit, can be used to batch edit mkv track titles/properties without remuxing
