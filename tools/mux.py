@@ -5,6 +5,7 @@ import sys
 
 # Path to mkvmerge executable (Running from temp, so tools is one level up)
 MKVMERGE = os.path.join("..", "tools", "MKVToolNix", "mkvmerge.exe")
+SOURCE_EXTENSIONS = (".mkv", ".mp4", ".m2ts")
 
 def run_mkvmerge(cmd, status_label):
     """
@@ -51,22 +52,27 @@ def mux_files():
     ivf_files = glob.glob("*.ivf")
 
     if not ivf_files:
-        print("No .ivf files found to mux.")
-        return
+        print("[ERROR] No .ivf files found to mux.")
+        return False
 
     print(f"Found {len(ivf_files)} .ivf files. Starting muxing process...\n")
+
+    all_succeeded = True
 
     for ivf_file in ivf_files:
         base_name = os.path.splitext(ivf_file)[0]
         
-        # Check for source file:
-        # 1. Check exact match (e.g. s01e01.mkv)
-        # 2. Check if it was renamed by the batch (e.g. s01e01-source.mkv)
-        possible_sources = [f"{base_name}.mkv", f"{base_name}-source.mkv"]
-        source_mkv = next((f for f in possible_sources if os.path.exists(f)), None)
+        # Match every source type accepted by dispatch.py. Also support the
+        # legacy "-source" filename used by older workflow versions.
+        possible_sources = []
+        for extension in SOURCE_EXTENSIONS:
+            possible_sources.append(f"{base_name}{extension}")
+            possible_sources.append(f"{base_name}-source{extension}")
+        source_file = next((f for f in possible_sources if os.path.isfile(f)), None)
 
-        if not source_mkv:
-            print(f"[SKIP] Source MKV not found for: {ivf_file}")
+        if not source_file:
+            print(f"[FAIL] Source video not found for: {ivf_file}")
+            all_succeeded = False
             continue
 
         temp_mkv = f"{base_name}_temp_no_video.mkv"
@@ -74,7 +80,7 @@ def mux_files():
 
         try:
             # Step 1: Extract Audio/Subs (No Video)
-            cmd_step1 = [MKVMERGE, "-o", temp_mkv, "--no-video", source_mkv]
+            cmd_step1 = [MKVMERGE, "-o", temp_mkv, "--no-video", source_file]
             run_mkvmerge(cmd_step1, f"[{base_name}] Step 1/2 (Extract)")
 
             # Step 2: Mux IVF + Audio/Subs
@@ -87,8 +93,18 @@ def mux_files():
 
         except subprocess.CalledProcessError:
             print(f"\n[FAIL] Could not process {base_name}. Skipping.")
+            all_succeeded = False
         except Exception as e:
             print(f"\n[ERROR] Unexpected error: {e}")
+            all_succeeded = False
+        finally:
+            if os.path.exists(temp_mkv):
+                try:
+                    os.remove(temp_mkv)
+                except OSError:
+                    pass
+
+    return all_succeeded
 
 if __name__ == "__main__":
-    mux_files()
+    sys.exit(0 if mux_files() else 1)

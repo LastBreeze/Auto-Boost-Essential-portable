@@ -223,29 +223,39 @@ def main():
             # 4. External Scripts
             mux_script = os.path.join(tools_dir, "mux.py")
             tag_script = os.path.join(tools_dir, "tag.py")
+            generated_output = os.path.join(input_dir, f"{name}-output.mkv")
             
             print("[Dispatch] Starting Muxing Process...")
+            mux_success = False
             try:
                 # Muxing output is allowed to pass through (it handles its own formatting)
-                subprocess.run([python_exe, mux_script], cwd=input_dir, check=False)
+                subprocess.run([python_exe, mux_script], cwd=input_dir, check=True)
+                if not os.path.isfile(generated_output):
+                    raise FileNotFoundError(
+                        f"Mux completed without creating {os.path.basename(generated_output)}"
+                    )
+                mux_success = True
+            except subprocess.CalledProcessError as e:
+                print(f"[Dispatch] Muxing failed with exit code {e.returncode}; output was not moved.")
             except Exception as e:
                 print(f"[Dispatch] Mux error: {e}")
 
-            print("[Dispatch] Starting Tagging Process...")
-            try:
-                for ivf in glob.glob(os.path.join(input_dir, "*.ivf")):
-                    os.remove(ivf)
-                # Tagging is silent
-                subprocess.run([python_exe, tag_script], cwd=input_dir, check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            except Exception as e:
-                print(f"[Dispatch] Tag error: {e}")
-                
-            # 5. Move Output (Silent)
-            found_outputs = glob.glob(os.path.join(input_dir, "*-output.mkv"))
-            for out_file in found_outputs:
-                out_name = os.path.basename(out_file)
+            if mux_success:
+                print("[Dispatch] Starting Tagging Process...")
                 try:
-                    shutil.move(out_file, os.path.join(output_dir, out_name))
+                    for ivf in glob.glob(os.path.join(input_dir, "*.ivf")):
+                        os.remove(ivf)
+                    # Tagging is silent
+                    subprocess.run([python_exe, tag_script], cwd=input_dir, check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                except Exception as e:
+                    print(f"[Dispatch] Tag error: {e}")
+
+                # 5. Move this file's verified output only.
+                out_name = os.path.basename(generated_output)
+                try:
+                    destination = os.path.join(output_dir, out_name)
+                    shutil.move(generated_output, destination)
+                    print(f"[Dispatch] Output ready: {destination}")
                 except Exception as e:
                     print(f"[Dispatch] Error moving output: {e}")
 
