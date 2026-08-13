@@ -9,6 +9,29 @@ SVT_BUILD_ROOT = os.path.join("SVT-AV1-Essential builds", "SVT-AV1-Essential_v4.
 STANDARD_SVT_BUILD = os.path.join(SVT_BUILD_ROOT, "Clang 22.1.1 x86-64-v3", "SvtAv1EncApp.exe")
 AVX512_SVT_BUILD = os.path.join(SVT_BUILD_ROOT, "Clang 22.1.1 icelake-server + znver4", "SvtAv1EncApp.exe")
 
+# SVT-AV1-Essential's --preset range (Source/API/EbSvtAv1Enc.h: -1 .. ENC_M13).
+MIN_SVT_PRESET = -1
+MAX_SVT_PRESET = 13
+
+# Batch files set the effort for each pass in FAST_SPEED / FINAL_SPEED.  Only five presets
+# have a --speed name (slower 2, slow 4, medium 5, fast 6, faster 8), so an unnamed preset
+# is written as a bare number, e.g. FINAL_SPEED=1.  Auto-Boost-Essential.py accepts only the
+# names, so a numeric speed is translated here into a --preset carried in that pass's params.
+SPEED_TO_PARAMS = {"--fast-speed": "--fast-params", "--final-speed": "--final-params"}
+
+
+def parse_numeric_speed(value):
+    """Return the preset number if a *_SPEED value is numeric, or None if it is a name."""
+    try:
+        preset = int(value)
+    except ValueError:
+        return None
+    if preset < MIN_SVT_PRESET or preset > MAX_SVT_PRESET:
+        print(f"[Dispatch] ERROR: preset {preset} is outside the range "
+              f"[{MIN_SVT_PRESET}-{MAX_SVT_PRESET}] supported by SVT-AV1-Essential.")
+        sys.exit(1)
+    return preset
+
 
 def copy_svt_encoder(tools_dir, input_dir, use_avx512):
     """Copy the selected SVT-AV1-Essential executable into videos-input.
@@ -63,6 +86,16 @@ def main():
     raw_args = sys.argv[1:]
     use_avx512 = False
     input_args = []
+    # Maps "--fast-params" / "--final-params" to a preset number pulled from a numeric
+    # FAST_SPEED / FINAL_SPEED.  The speed flag itself is dropped for that pass:
+    # SVT-AV1-Essential gives --speed priority over --preset, so passing both would
+    # silently discard the preset.
+    preset_for_params = {}
+    # A hand-edited batch file may already set --preset in a pass's params; that wins.
+    given_params = {}
+    for pos, arg in enumerate(raw_args):
+        if arg in SPEED_TO_PARAMS.values() and pos + 1 < len(raw_args):
+            given_params[arg] = raw_args[pos + 1]
     idx = 0
     while idx < len(raw_args):
         arg = raw_args[idx]
@@ -70,6 +103,19 @@ def main():
             use_avx512 = True
             idx += 1
             continue
+        if arg in SPEED_TO_PARAMS and idx + 1 < len(raw_args):
+            preset = parse_numeric_speed(raw_args[idx + 1].strip())
+            if preset is not None:
+                params_flag = SPEED_TO_PARAMS[arg]
+                if "--preset" in given_params.get(params_flag, "").split():
+                    print(f"[Dispatch] {params_flag} already sets --preset; "
+                          f"ignoring {arg} {preset}.")
+                else:
+                    preset_for_params[params_flag] = preset
+                    print(f"[Dispatch] {arg} {preset} is an unnamed preset; "
+                          f"passing it as --preset {preset}.")
+                idx += 2
+                continue
         input_args.append(arg)
         idx += 1
 
@@ -196,15 +242,24 @@ def main():
                 continue
             if arg in ("--fast-params", "--final-params"):
                 final_cmd.append(arg)
+                param_str = ""
                 if idx + 1 < len(input_args):
                     param_str = input_args[idx + 1]
-                    if current_flags: param_str += current_flags
-                    final_cmd.append(param_str)
                     skip_next = True
-                else:
-                    final_cmd.append("")
+                preset = preset_for_params.get(arg)
+                # A hand-edited batch file may already carry its own --preset; leave it be.
+                if preset is not None and "--preset" not in param_str.split():
+                    param_str = f"{param_str} --preset {preset}".strip()
+                if current_flags: param_str += current_flags
+                final_cmd.append(param_str)
             else:
                 final_cmd.append(arg)
+
+        # A numeric speed with no matching params flag on the command line still needs
+        # somewhere to put its --preset.
+        for params_flag, preset in preset_for_params.items():
+            if params_flag not in final_cmd:
+                final_cmd.extend([params_flag, f"--preset {preset}{current_flags}"])
 
         # 3. Execute Auto-Boost (Silent Dispatch)
         # We rely on Auto-Boost-Essential.py's own progress bars for visibility

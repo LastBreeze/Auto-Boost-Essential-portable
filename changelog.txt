@@ -1,5 +1,16 @@
 Changelog
 
+v1.4.5
+---------------------------------
+• FAST_SPEED and FINAL_SPEED now accept a preset number as well as a name, for presets that have no name.
+  - Named speeds are slower=2, slow=4, medium=5, fast=6, faster=8. Presets like 0, 1 and 3 are written as the number itself.
+• Generated .bat files now document the speed names and their preset numbers.
+
+v1.4.4
+---------------------------------
+• Added an encoder preset question to bat-builder, presets 0 to 4 with 4 as the default.
+• Generated .bat files now explain that they can be edited in Notepad++ and that FAST_PARAMS and FINAL_PARAMS must match.
+
 v1.43
 ---------------------------------
 • Code cleanup, repair mp4 support, improve bat-builder settings
